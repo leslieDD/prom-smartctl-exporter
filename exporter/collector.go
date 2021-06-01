@@ -69,6 +69,11 @@ func (c *Collector) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, erro
 	}
 	smart := ParseSmart(string(out))
 
+	if len(smart.attrs) == 0 || len(smart.info) == 0 {
+		log.Printf("[ERROR] attrs or info is empty\n%s\n", out)
+		return nil, err
+	}
+
 	labels := []string{
 		c.device,
 		smart.GetInfo("Device Model", "Model Family"),
