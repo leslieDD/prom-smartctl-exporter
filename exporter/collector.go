@@ -1,10 +1,15 @@
 package exporter
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os/exec"
+	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 var _ prometheus.Collector = &Collector{}
@@ -62,8 +67,13 @@ func (c *Collector) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, erro
 		return nil, nil
 	}
 
-	out, err := exec.Command("smartctl", "-iA", c.device).CombinedOutput()
+	// out, err := exec.Command("smartctl", "-iA", c.device).CombinedOutput()
+	code, out, err := ExecCmd("smartctl", "-iA", c.device)
 	if err != nil {
+		log.Printf("[ERROR] smart log: \n%s\n", out)
+		return nil, err
+	}
+	if code != 0 {
 		log.Printf("[ERROR] smart log: \n%s\n", out)
 		return nil, err
 	}
@@ -93,4 +103,40 @@ func (c *Collector) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, erro
 	)
 
 	return nil, nil
+}
+
+// 返回结果状态码，终端【标准输出，错误输出】输出，错误信息
+func ExecCmd(command string, args ...string) (int, string, error) {
+	cmd := exec.Command(command, args...)
+	output, err := cmd.CombinedOutput()
+	var res int
+	if err != nil {
+		if ex, ok := err.(*exec.ExitError); ok {
+			res = ex.Sys().(syscall.WaitStatus).ExitStatus()
+		}
+		return res, "", err
+	}
+	if utf8Output, err := GbkToUtf8(output); err != nil {
+		return res, string(output), nil
+	} else {
+		return res, string(utf8Output), nil
+	}
+}
+
+func GbkToUtf8(s []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
+	d, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return d, nil
+}
+
+func Utf8ToGbk(s []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewEncoder())
+	d, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return d, nil
 }
