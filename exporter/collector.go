@@ -55,11 +55,12 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
-	if desc, err := c.collect(ch); err != nil {
-		log.Printf("[ERROR] failed collecting metric %v: %v", desc, err)
-		ch <- prometheus.NewInvalidMetric(desc, err)
-		return
-	}
+	// if desc, err := c.collect(ch); err != nil {
+	// 	log.Printf("[ERROR] failed collecting metric %v: %v", desc, err)
+	// 	ch <- prometheus.NewInvalidMetric(desc, err)
+	// 	return
+	// }
+	_, _ = c.collect(ch)
 }
 
 func (c *Collector) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, error) {
@@ -70,11 +71,11 @@ func (c *Collector) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, erro
 	// out, err := exec.Command("smartctl", "-iA", c.device).CombinedOutput()
 	code, out, err := ExecCmd("smartctl", "-iA", c.device)
 	if err != nil {
-		log.Printf("[ERROR] smart log: \n%s\n", out)
+		log.Printf("[ERROR] smart log: \n%s\n device: %s", out, c.device)
 		return nil, err
 	}
 	if code != 0 {
-		log.Printf("[ERROR] smart log: \n%s\n", out)
+		log.Printf("[ERROR] code: %d, device: %s, smart log: \n%s\n", code, c.device, out)
 		return nil, err
 	}
 	smart := ParseSmart(string(out))
