@@ -1,9 +1,10 @@
 package exporter
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"log"
 	"os/exec"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var _ prometheus.Collector = &Collector{}
