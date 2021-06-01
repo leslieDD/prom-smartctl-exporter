@@ -1,5 +1,5 @@
 [Unit]
-Description=Prometheus Alert DingDingTalk
+Description=Prometheus Alert Disk Exporter
 Requires=network.target
 After=network.target
 
