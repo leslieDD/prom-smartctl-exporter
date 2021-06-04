@@ -1,14 +1,16 @@
 package exporter
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"log"
 	"os/exec"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
 	namespace = "smartctl"
+	cpuspace  = "proccpu"
 )
 
 // An Exporter is a Prometheus exporter for metrics.
@@ -46,4 +48,5 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	for _, device := range devices {
 		NewCollector(device).Collect(ch)
 	}
+	NewCollectCpuInfo().collect(ch)
 }
