@@ -45,10 +45,6 @@ func (c *CollectCpuInfo) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (c *CollectCpuInfo) collect(ch chan<- prometheus.Metric) (*prometheus.Desc, error) {
-	if c.device == "" {
-		return nil, nil
-	}
-
 	info := GetCpuInfo()
 	if info == nil || len(info) == 0 {
 		return nil, nil
