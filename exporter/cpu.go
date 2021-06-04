@@ -23,7 +23,7 @@ func NewCollectCpuInfo() *CollectCpuInfo {
 	)
 	return &CollectCpuInfo{
 		ModelName: prometheus.NewDesc(
-			prometheus.BuildFQName(cpuspace, "", "modename"),
+			prometheus.BuildFQName(namespace, "", "modename"),
 			"cpu mode name",
 			labels,
 			nil,
