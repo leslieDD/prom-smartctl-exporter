@@ -18,6 +18,7 @@ type CollectCpuInfo struct {
 func NewCollectCpuInfo() *CollectCpuInfo {
 	var (
 		labels = []string{
+			"core",
 			"modename",
 		}
 	)
